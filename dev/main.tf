@@ -77,47 +77,59 @@ resource "aws_instance" "wordpress_ec2" {
 
 
   user_data = <<-EOF
-              #!/bin/bash
-              sudo apt update -y
-              sudo apt install amazon-ssm-agent apache2 php mysql-client php-mysql -y
 
-              sudo systemctl start amazon-ssm-agent
-              sudo systemctl enable amazon-ssm-agent
-              
-              sudo systemctl start apache2
-              sudo systemctl enable apache2
+        #!/bin/bash
+        # Update the system and install necessary packages
+        sudo apt update -y
+        sudo apt install apache2 php mysql-client php-mysql unzip wget -y
 
-              cd /var/www/html
-              wget https://wordpress.org/latest.zip
-              unzip latest.zip
-              mv wordpress/* .
-              rm -rf wordpress latest.zip
-              chown -R www-data:www-data /var/www/html
-              chmod -R 755 /var/www/html
-              EOF
-}
+        # Start and enable apache2 service
+        sudo systemctl start apache2
+        sudo systemctl enable apache2
 
-output "ec2_public_ip" {
-  value = aws_instance.wordpress_ec2.public_ip
-}
+        # Install and start Amazon SSM agent (for remote management)
+        sudo apt install -y amazon-ssm-agent
+        sudo systemctl start amazon-ssm-agent
+        sudo systemctl enable amazon-ssm-agent
 
-resource "aws_iam_role" "ssm_role" {
-  name = "ssm_role"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-  
-}
-EOF
+        # Download and extract WordPress
+        cd /var/www/html
+        wget https://wordpress.org/latest.zip
+        unzip latest.zip
+        mv wordpress/* .
+        rm -rf wordpress latest.zip
+
+        # Set the right permissions for WordPress
+        chown -R www-data:www-data /var/www/html
+        chmod -R 755 /var/www/html
+
+        # Restart Apache to apply any changes
+        sudo systemctl restart apache2
+
+                    EOF
+        }
+
+        output "ec2_public_ip" {
+        value = aws_instance.wordpress_ec2.public_ip
+        }
+
+        resource "aws_iam_role" "ssm_role" {
+        name = "ssm_role"
+        assume_role_policy = <<EOF
+        {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+            }
+        ]
+        
+        }
+        EOF
 }
 
 resource "aws_iam_policy_attachment" "ssm_iam_policy_attach" {
