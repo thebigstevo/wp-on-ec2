@@ -73,15 +73,60 @@ resource "aws_instance" "wordpress_ec2" {
   security_groups        = [aws_security_group.wordpress_sg.id]
   associate_public_ip_address = true
 
+  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
+
+
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install apache2 php mysql-client php-mysql -y
-              systemctl start apache2
-              systemctl enable apache2
+              sudo apt update -y
+              sudo apt install amazon-ssm-agent apache2 php mysql-client php-mysql -y
+
+              sudo systemctl start amazon-ssm-agent
+              sudo systemctl enable amazon-ssm-agent
+              
+              sudo systemctl start apache2
+              sudo systemctl enable apache2
+
+              cd /var/www/html
+              wget https://wordpress.org/latest.zip
+              unzip latest.zip
+              mv wordpress/* .
+              rm -rf wordpress latest.zip
+              chown -R www-data:www-data /var/www/html
+              chmod -R 755 /var/www/html
               EOF
 }
 
 output "ec2_public_ip" {
   value = aws_instance.wordpress_ec2.public_ip
+}
+
+resource "aws_iam_role" "ssm_role" {
+  name = "ssm_role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+  
+}
+EOF
+}
+
+resource "aws_iam_policy_attachment" "ssm_iam_policy_attach" {
+  name = "attach_ssm_policy"
+  roles = [aws_iam_role.ssm_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  name = "ssm_instance_profile"
+  role = aws_iam_role.ssm_role.name
 }
