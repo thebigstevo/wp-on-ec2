@@ -34,3 +34,8 @@ resource "aws_route_table" "wp-rt" {
     Name = "wp-rt"
   }
 }
+
+resource "aws_route_table_association" "wp-rta" {
+  subnet_id = aws_subnet.wp-subnet.id
+  route_table_id = aws_route_table.wp-rt.id
+}
