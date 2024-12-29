@@ -77,29 +77,38 @@ resource "aws_instance" "wordpress_ec2" {
 
 
   user_data = <<-EOF
+    #!/bin/bash
+    touch /var/log/user_data.log
+    exec > /var/log/user_data.log 2>&1
+    set -ex
 
-#!/bin/bash
-        exec > /var/log/user_data.log 2>&1
+    echo "Starting system update..."
+    apt update -y
+    echo "System update complete."
 
-        # Update the system and install necessary packages
-        apt update -y
-        # Install and start Amazon SSM agent (for remote management)
-        apt install -y amazon-ssm-agent
-        systemctl start amazon-ssm-agent
-        systemctl enable amazon-ssm-agent
+    echo "Installing SSM agent..."
+    apt install -y amazon-ssm-agent
+    systemctl start amazon-ssm-agent
+    systemctl enable amazon-ssm-agent
 
-        apt update -y
-        apt install apache2 php mysql-client php-mysql unzip wget -y
-        systemctl start apache2
-        systemctl enable apache2
-        cd /var/www/html
-        wget https://wordpress.org/latest.zip
-        unzip latest.zip
-        mv wordpress/*
-        rm -rf wordpress latest.zip
-        chown -R www-data:www-data /var/www/html/
-        chmod -R 755 /var/www/html
-        systemctl restart apache2
+    echo "Installing Apache, PHP, and MySQL client..."
+    apt update -y
+    apt install apache2 php mysql-client php-mysql unzip wget -y
+    systemctl start apache2
+    systemctl enable apache2
+
+    echo "Downloading and setting up WordPress..."
+    cd /var/www/html
+    wget https://wordpress.org/latest.zip
+    unzip latest.zip
+    mv wordpress/* .
+    rm -rf wordpress latest.zip
+    chown -R www-data:www-data /var/www/html/
+    chmod -R 755 /var/www/html
+    systemctl restart apache2
+
+    echo "Setup complete."
+
 
         EOF
         }
