@@ -19,4 +19,18 @@ resource "aws_subnet" "wp-subnet" {
 
 resource "aws_internet_gateway" "wp-igw" {
   vpc_id = aws_vpc.wp-vpc.id
+  tags = {
+    Name = "wp-igw"
+  }
+}
+
+resource "aws_route_table" "wp-rt" {
+  vpc_id = aws_vpc.wp-vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.wp-igw.id
+  }
+  tags = {
+    Name = "wp-rt"
+  }
 }
