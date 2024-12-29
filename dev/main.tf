@@ -39,3 +39,51 @@ resource "aws_route_table_association" "wp-rta" {
   subnet_id = aws_subnet.wp-subnet.id
   route_table_id = aws_route_table.wp-rt.id
 }
+
+resource "aws_security_group" "wordpress_sg" {
+  name = "wordpress_sg"
+  vpc_id = aws_vpc.wp-vpc.id
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "wordpress_sg"
+  }
+}
+resource "aws_instance" "wordpress_ec2" {
+  ami           = "ami-0e9085e60087ce171" # Ubuntu 24.04 AMI for eu-west-1
+  instance_type = "t2.micro"
+
+  subnet_id              = aws_subnet.wp-subnet.id
+  security_groups        = [aws_security_group.wordpress_sg.name]
+  associate_public_ip_address = true
+
+  key_name = "your-key-pair"
+
+  user_data = <<-EOF
+              #!/bin/bash
+              apt update -y
+              apt install apache2 php mysql-client php-mysql -y
+              systemctl start apache2
+              systemctl enable apache2
+              EOF
+}
+
+output "ec2_public_ip" {
+  value = aws_instance.wordpress_ec2.public_ip
+}
