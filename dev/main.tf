@@ -70,7 +70,7 @@ resource "aws_instance" "wordpress_ec2" {
   instance_type = "t2.micro"
 
   subnet_id              = aws_subnet.wp-subnet.id
-  security_groups        = [aws_security_group.wordpress_sg.name]
+  security_groups        = [aws_security_group.wordpress_sg.id]
   associate_public_ip_address = true
 
   user_data = <<-EOF
