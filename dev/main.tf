@@ -73,8 +73,6 @@ resource "aws_instance" "wordpress_ec2" {
   security_groups        = [aws_security_group.wordpress_sg.name]
   associate_public_ip_address = true
 
-  key_name = "your-key-pair"
-
   user_data = <<-EOF
               #!/bin/bash
               apt update -y
