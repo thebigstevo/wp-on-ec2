@@ -1,0 +1,101 @@
+resource "aws_instance" "wordpress_ec2" {
+  ami           = "ami-0e9085e60087ce171" # Ubuntu 24.04 AMI for eu-west-1
+  instance_type = "t2.micro"
+
+  subnet_id              = aws_subnet.wp-subnet.id
+  security_groups        = [aws_security_group.wordpress_sg.id]
+  associate_public_ip_address = true
+
+  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
+
+
+  user_data = <<-EOF
+            #!/bin/bash
+            touch /var/log/user_data.log
+            exec > /var/log/user_data.log 2>&1
+            set -ex
+
+            echo "Starting system update..."
+            apt update -y
+            echo "System update complete."
+
+            echo "Installing Apache, PHP, and MySQL client..."
+            apt install apache2 php mysql-client php-mysql unzip wget -y
+            systemctl start apache2
+            systemctl enable apache2
+
+            echo "Downloading and setting up WordPress..."
+            cd /var/www/html
+            wget https://wordpress.org/latest.zip
+            unzip latest.zip
+            mv wordpress/* .
+            rm -rf wordpress latest.zip
+            chown -R www-data:www-data /var/www/html/
+            chmod -R 755 /var/www/html
+            systemctl restart apache2
+
+            # Install MySQL server
+            echo "Installing MySQL server..."
+            apt install mysql-server -y
+            systemctl start mysql
+            systemctl enable mysql
+
+            # Create WordPress database and user
+            mysql -u root -e "CREATE DATABASE wordpress;"
+            mysql -u root -e "CREATE USER 'wordpress_user'@'localhost' IDENTIFIED BY 'yourpassword';"
+            mysql -u root -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress_user'@'localhost';"
+            mysql -u root -e "FLUSH PRIVILEGES;"
+
+            #configure WordPress
+            # Create the wp-config.php file from the sample
+            cp wp-config-sample.php wp-config.php
+
+            # Set database details
+            sed -i "s/database_name_here/wordpress/" wp-config.php
+            sed -i "s/username_here/wordpress_user/" wp-config.php
+            sed -i "s/password_here/yourpassword/" wp-config.php
+
+            # Ensure proper permissions
+            chown -R www-data:www-data /var/www/html
+            chmod -R 755 /var/www/html
+
+            # Restart Apache to apply changes
+            systemctl restart apache2
+            echo "Setup complete."
+
+        EOF
+        }
+
+        output "ec2_public_ip" {
+        value = aws_instance.wordpress_ec2.public_ip
+        }
+
+        resource "aws_iam_role" "ssm_role" {
+        name = "ssm_role"
+        assume_role_policy = <<EOF
+        {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+            }
+        ]
+        
+        }
+        EOF
+}
+
+resource "aws_iam_policy_attachment" "ssm_iam_policy_attach" {
+  name = "attach_ssm_policy"
+  roles = [aws_iam_role.ssm_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  name = "ssm_instance_profile"
+  role = aws_iam_role.ssm_role.name
+}
