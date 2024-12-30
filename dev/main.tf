@@ -1,7 +1,7 @@
 resource "aws_vpc" "wp-vpc" {
-    cidr_block = "10.0.0.0/16"
-    enable_dns_support = true
-    enable_dns_hostnames = true
+    cidr_block = var.vpc_cidr_block
+    enable_dns_support = var.enable_dns_support
+    enable_dns_hostnames = var.enable_dns_support
     tags = {
         Name = "wp-vpc"
     }
@@ -13,7 +13,7 @@ data "aws_availability_zones" "available" {
 
 resource "aws_subnet" "wp-subnet" {
   vpc_id = aws_vpc.wp-vpc.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = var.subnet_cidr_block
   availability_zone = data.aws_availability_zones.available.names[0]
 }
 
@@ -65,13 +65,15 @@ resource "aws_security_group" "wordpress_sg" {
     Name = "wordpress_sg"
   }
 }
+
+
 resource "aws_instance" "wordpress_ec2" {
-  ami           = "ami-0e9085e60087ce171" # Ubuntu 24.04 AMI for eu-west-1
-  instance_type = "t2.micro"
+  ami           = var.ami 
+  instance_type = var.instance_type
 
   subnet_id              = aws_subnet.wp-subnet.id
   security_groups        = [aws_security_group.wordpress_sg.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = var.associate_public_ip_address
 
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
 
@@ -114,3 +116,4 @@ resource "aws_iam_instance_profile" "ssm_instance_profile" {
   name = "ssm_instance_profile"
   role = aws_iam_role.ssm_role.name
 }
+
