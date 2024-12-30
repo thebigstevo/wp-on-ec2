@@ -20,6 +20,9 @@ unzip latest.zip
 mv wordpress/* .
 rm -rf wordpress latest.zip
 
+# Source Apache environment variables to ensure APACHE_LOG_DIR is set
+source /etc/apache2/envvars
+
 # Configure Apache for WordPress
 echo "Configuring Apache for WordPress..."
 cat <<EOT > /etc/apache2/sites-available/wordpress.conf
