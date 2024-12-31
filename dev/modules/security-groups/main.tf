@@ -1,6 +1,6 @@
 resource "aws_security_group" "wordpress_sg" {
   name   = "wordpress_sg"
-  vpc_id = aws_vpc.wp-vpc.id
+  vpc_id = var.vpc_id
   ingress {
     from_port   = 80
     to_port     = 80
@@ -23,3 +23,5 @@ resource "aws_security_group" "wordpress_sg" {
     Name = "wordpress_sg"
   }
 }
+
+
