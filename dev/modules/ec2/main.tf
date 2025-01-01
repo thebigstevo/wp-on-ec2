@@ -9,7 +9,7 @@ resource "aws_instance" "wordpress_ec2" {
   user_data = data.template_file.user_data.rendered
 
   tags = {
-    Name = "wordpress-ec2"
+    Name = var.instance_name  
   }
 }
 

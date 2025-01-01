@@ -62,3 +62,9 @@ variable "database_password" {
   description = "The password for the database"
   type        = string
 }
+
+variable "instance_name" {
+  description = "The name of the EC2 instance"
+  type        = string
+  default = "wordpress-ec2"
+}
