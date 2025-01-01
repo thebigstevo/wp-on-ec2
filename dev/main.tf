@@ -17,13 +17,14 @@ module "iam" {
 }
 
 module "ec2" {
-  source = "./modules/ec2"
-  ami_id = var.ami_id
-  instance_type = var.instance_type
-  public_subnet_id = module.vpc.public_subnet_id
-  ssm_instance_profile = module.iam.ssm_instance_profile
+  source                      = "./modules/ec2"
+  ami_id                      = var.ami_id
+  instance_type               = var.instance_type
+  public_subnet_id            = module.vpc.public_subnet_id
+  ssm_instance_profile        = module.iam.ssm_instance_profile
   associate_public_ip_address = var.associate_public_ip_address
-  vpc_security_group_ids = [module.security_groups.wordpress_sg_id]
+  vpc_security_group_ids      = [module.security_groups.wordpress_sg_id]
   database_password           = var.database_password
+  instance_name               = var.instance_name  
 }
 
