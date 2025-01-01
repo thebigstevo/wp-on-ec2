@@ -57,6 +57,19 @@ variable "environment" {
   default     = "dev"
 
 }
+variable "database" {
+  description = "The database to connect to"
+  type        = string
+  default     = "wordpress"
+
+}
+
+variable "db_user" {
+  description = "The database user"
+  type        = string
+  default     = "wordpress_user"
+  
+}
 
 variable "database_password" {
   description = "The password for the database"

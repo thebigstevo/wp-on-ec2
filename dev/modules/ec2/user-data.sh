@@ -3,12 +3,16 @@ touch /var/log/user_data.log
 exec > /var/log/user_data.log 2>&1
 set -ex
 
+DB_NAME="${DB_NAME}"
+DB_USER="${DB_USER}"
+DB_PASSWORD="${DB_PASSWORD}"
+
 echo "Starting system update..."
 apt update -y && apt upgrade -y
 echo "System update complete."
 
-echo "Installing Apache, PHP, and MySQL client..."
-apt install apache2 php mysql-client php-mysql unzip wget -y
+echo "Installing Apache, PHP, and MySQL server..."
+apt install -y apache2 php mysql-server php-mysql unzip wget
 systemctl start apache2
 systemctl enable apache2
 
@@ -45,25 +49,24 @@ systemctl reload apache2
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 
-echo "Installing MySQL server..."
-apt install mysql-server -y
+echo "Starting MySQL server..."
 systemctl start mysql
 systemctl enable mysql
 
 # Create WordPress database and user
 mysql -u root <<EOF
-CREATE DATABASE wordpress;
-CREATE USER 'wordpress_user'@'localhost' IDENTIFIED BY 'yourpassword';
-GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress_user'@'localhost';
+CREATE DATABASE ${DB_NAME};
+CREATE USER '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 EOF
 
 echo "Configuring WordPress..."
 cd /var/www/html
 cp wp-config-sample.php wp-config.php
-sed -i "s/database_name_here/wordpress/" wp-config.php
-sed -i "s/username_here/wordpress_user/" wp-config.php
-sed -i "s/password_here/yourpassword/" wp-config.php
+sed -i "s/database_name_here/${DB_NAME}/" wp-config.php
+sed -i "s/username_here/${DB_USER}/" wp-config.php
+sed -i "s/password_here/${DB_PASSWORD}/" wp-config.php
 
 # Restart Apache to apply changes
 systemctl restart apache2

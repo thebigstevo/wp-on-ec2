@@ -17,7 +17,9 @@ data "template_file" "user_data" {
   template = file("${path.module}/user-data.sh")
 
   vars = {
-    database_password = var.database_password
+    DB_NAME     = var.database,
+    DB_USER     = var.db_user,
+    DB_PASSWORD = var.database_password
   }
 }
 

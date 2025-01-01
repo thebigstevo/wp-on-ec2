@@ -27,6 +27,17 @@ variable "ssm_instance_profile" {
   description = "The IAM instance profile for SSM"
   type        = string
 }
+variable "database" {
+  description = "The database to connect to"
+  type        = string
+
+}
+
+variable "db_user" {
+  description = "The database user"
+  type        = string
+  
+}
 
 variable "database_password" {
   description = "The password for the database"
