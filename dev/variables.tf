@@ -1,36 +1,48 @@
 variable "enable_dns_hostnames" {
-  default = true
+  description = "Enable DNS hostnames in the VPC"
+  type        = bool
+  default     = true
 
 }
 variable "enable_dns_support" {
-  default = true
+  description = "Enable DNS support in the VPC"
+  type        = bool
+  default     = true
 
 }
 
 variable "vpc_cidr_block" {
-  type    = string
-  default = "10.0.0.0/16"
+  description = "The CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"
 
 }
 
 variable "subnet_cidr_block" {
-  type    = string
-  default = "10.0.1.0/24"
+  description = "The CIDR block for the subnet"
+  type        = string
+  default     = "10.0.1.0/24"
 
 }
 
 variable "ami_id" {
-  default = "ami-0e9085e60087ce171" # Ubuntu 24.04 AMI for eu-west-1
+  description = "The AMI ID for the EC2 instance"
+  type        = string
+  default     = "ami-0e9085e60087ce171" # Ubuntu 24.04 AMI for eu-west-1
 
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  description = "The instance type for the EC2 instance"
+  type        = string
+  default     = "t2.micro"
 
 }
 
 variable "associate_public_ip_address" {
-  default = true
+  description = "Associate a public IP address with the EC2 instance"
+  type        = bool
+  default     = true
 
 }
 
@@ -40,6 +52,20 @@ variable "map_public_ip_on_launch" {
 }
 
 variable "environment" {
-  default = "dev"
+  description = "The environment (e.g., dev, prod)"
+  type        = string
+  default     = "dev"
 
+}
+
+variable "database_password" {
+  description = "The password for the database"
+  type        = string
+  default = "yourpassword"
+}
+
+variable "instance_name" {
+  description = "The name of the EC2 instance"
+  type        = string
+  default = "wordpress-ec2"
 }
