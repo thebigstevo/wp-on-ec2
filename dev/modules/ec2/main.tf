@@ -19,7 +19,7 @@ data "template_file" "user_data" {
   vars = {
     DB_NAME     = var.database,
     DB_USER     = var.db_user,
-    database_password = var.database_password
+    DB_PASSWORD = var.database_password
   }
 }
 
