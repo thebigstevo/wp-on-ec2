@@ -22,6 +22,7 @@ module "ec2" {
   instance_type = var.instance_type
   public_subnet_id = module.vpc.public_subnet_id
   ssm_instance_profile = module.iam.ssm_instance_profile
-  associate_public_ip_address = true
+  associate_public_ip_address = var.associate_public_ip_address
   vpc_security_group_ids = [module.security_groups.wordpress_sg_id]
 }
+

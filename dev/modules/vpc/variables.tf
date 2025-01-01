@@ -1,20 +1,19 @@
-variable "enable_dns_hostnames" {
-  default = true
-
-}
-variable "enable_dns_support" {
-  default = true
-
-}
-
 variable "vpc_cidr_block" {
-  type    = string
-  default = "10.0.0.0/16"
-
+  description = "The CIDR block for the VPC"
+  type        = string
 }
 
 variable "subnet_cidr_block" {
-  type    = string
-  default = "10.0.1.0/24"
+  description = "The CIDR block for the subnet"
+  type        = string
+}
 
+variable "enable_dns_support" {
+  description = "Enable DNS support in the VPC"
+  type        = bool
+}
+
+variable "enable_dns_hostnames" {
+  description = "Enable DNS hostnames in the VPC"
+  type        = bool
 }
