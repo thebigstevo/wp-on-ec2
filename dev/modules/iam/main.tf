@@ -1,6 +1,6 @@
 
 resource "aws_iam_role" "ssm_role" {
-  name               = "ssm_role"
+  name               = "ssm_role_${var.environment}"
   assume_role_policy = <<EOF
 {
 "Version": "2012-10-17",
@@ -32,3 +32,4 @@ output "ssm_instance_profile" {
   value = aws_iam_instance_profile.ssm_instance_profile.name
   
 }
+

@@ -23,6 +23,7 @@ module "security_groups" {
 
 module "iam" {
   source = "./modules/iam"  
+  environment = var.environment
   
 }
 
