@@ -24,5 +24,6 @@ module "ec2" {
   ssm_instance_profile = module.iam.ssm_instance_profile
   associate_public_ip_address = var.associate_public_ip_address
   vpc_security_group_ids = [module.security_groups.wordpress_sg_id]
+  database_password           = var.database_password
 }
 
