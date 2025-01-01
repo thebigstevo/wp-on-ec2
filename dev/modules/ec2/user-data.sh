@@ -3,9 +3,9 @@ touch /var/log/user_data.log
 exec > /var/log/user_data.log 2>&1
 set -ex
 
-DB_NAME="wordpress"
-DB_USER="wordpress_user"
-DB_PASSWORD="${database_password}"
+DB_NAME="${DB_NAME}"
+DB_USER="${DB_USER}"
+DB_PASSWORD="${DB_PASSWORD}"
 
 echo "Starting system update..."
 apt update -y && apt upgrade -y
